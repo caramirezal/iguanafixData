@@ -1,0 +1,13 @@
+
+## downloading anticipo pro ventas from drive
+gdrive export 14lDB-kLUw76zs-ftMT0VLpy0CWnT8RphbSpuOV-e37U
+
+## processing data
+#Rscript anticipos.R
+
+## uploading to drive
+
+
+
+
+
