@@ -1,11 +1,16 @@
 
 ## downloading anticipo pro ventas from drive
-gdrive export 14lDB-kLUw76zs-ftMT0VLpy0CWnT8RphbSpuOV-e37U
+gdrive export --force 14lDB-kLUw76zs-ftMT0VLpy0CWnT8RphbSpuOV-e37U
 
 ## processing data
-#Rscript anticipos.R
+Rscript anticipos.R
 
 ## uploading to drive
+gdrive update 0B2I1tf9BPlOdNTd6eUh0QXVHQ3c ~/scripts/iguanafixData/scripts/anticipos/checkAnticipos.csv
+
+## check if the process is working
+ps -eaf | grep cron
+
 
 
 
