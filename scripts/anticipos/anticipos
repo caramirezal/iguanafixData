@@ -5,8 +5,11 @@ gdrive export --force 14lDB-kLUw76zs-ftMT0VLpy0CWnT8RphbSpuOV-e37U
 ## processing data
 Rscript anticipos.R
 
-## uploading to drive
+## uploading files to drive to drive
+## anticipos
 gdrive update 0B2I1tf9BPlOdNTd6eUh0QXVHQ3c ~/scripts/iguanafixData/scripts/anticipos/checkAnticipos.csv
+## payment pendings
+gdrive update 1OvnrNUzaTckKrF6NTjH81PcM0RV3jM9jWVayLFjbKdk ~/scripts/iguanafixData/scripts/anticipos/paymentPendings.csv
 
 ## check if the process is working
 ps -eaf | grep cron
