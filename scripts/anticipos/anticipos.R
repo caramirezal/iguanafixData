@@ -1,4 +1,6 @@
+library(dplyr)
 
+###################################################################################################################
 ## Automating cash advance payment check
 
 cat("Starting R script cash advance payment check\n")
@@ -11,54 +13,54 @@ anticiposDeVentas <- read.csv("Solicitud de Anticipos MX.csv")
 url <- "https://app.periscopedata.com/api/iguanafix/chart/csv/f86d75ad-d8af-8aba-f414-ec9fa88e7970"
 anticiposDePeriscope <- read.csv(url)
 
-colnames(anticiposDeVentas)[1] <- "job_id"
-
-## filter anticiposDeVentas
-anticiposDeVentas.filtered <- anticiposDeVentas[,c("job_id",
-                                                   "Costo.Cliente.Final",
-                                                   "Costo.PRO.Final",
-                                                   "Anticipo.Solicitado",
-                                                   "Ok.Pablo")]
-anticiposDeVentas.filtered$Costo.Cliente.Final <- as.numeric(gsub(",",
-                                                                  "",
-                                                                  anticiposDeVentas.filtered$Costo.Cliente.Final))
-anticiposDeVentas.filtered$Costo.PRO.Final <- as.numeric(gsub(",",
-                                         "",
-                                         anticiposDeVentas.filtered$Costo.PRO.Final))
-anticiposDeVentas.filtered$Anticipo.Solicitado <- as.numeric(gsub(",",
-                                                              "",
-                                                              anticiposDeVentas.filtered$Anticipo.Solicitado))
 
 
+## filtering anticiposDeVentas
+anticipos <- anticiposDeVentas
+anticipos$Costo.Cliente.Final <- as.numeric(gsub(",","",anticipos$Costo.Cliente.Final))
+anticipos$Costo.PRO.Final <- as.numeric(gsub(",","",anticipos$Costo.PRO.Final))
+anticipos$Anticipo.Solicitado <- as.numeric(gsub(",","",anticipos$Anticipo.Solicitado))
+
+check <- anticipos
 ## relating ventas and system data
-check <- merge(x=anticiposDeVentas.filtered,y=anticiposDePeriscope,by="job_id")
+#anticipos <- rename(anticipos, job_id = ID.JOB)
+#check <- merge(x=anticipos,y=anticiposDePeriscope,by="job_id")
 #check$"anticipoClienteSugerido" <-  ( check$Costo.Cliente.Final + check$Costo.PRO.Final ) / 2
 
 
-check$"fact_vs_montoPro" <- check$monto_pro < check$facturacion
-check$"margen_check" <- with(check, ( Costo.Cliente.Final - Costo.PRO.Final ) / Costo.Cliente.Final ) > 0.1  
-check$"margen_previsto" <- with(check, ( Costo.Cliente.Final - Costo.PRO.Final ) )
-check$"automatic_check" <- with(check, fact_vs_montoPro & margen_check )
+## payment advance checks:
+##
+## check facturacion > monto pro
+check$"fact_vs_montoPro" <- check$Costo.Cliente.Final >= 1.20*check$Costo.PRO.Final
+## check margen > 10%
+#check$"margen_check" <- with(check, ( Costo.Cliente.Final - Costo.PRO.Final ) / Costo.Cliente.Final ) > 0.1  
+## formatting check
+#check$"automatic_check" <- with(check, fact_vs_montoPro & margen_check )
+check$automatic_check <- check$fact_vs_montoPro
 formattedCheck <- character(length(check$automatic_check))
 for ( i in 1:length(check$automatic_check)) {
-  if ( check$automatic_check[i] == TRUE ) {
-    formattedCheck[i] <- "GO" 
-  } else { formattedCheck[i] <- "NO GO" }
+        if ( is.na(check$automatic_check[i] ) ) {
+                formattedCheck[i] <- "NO GO"
+        } else {
+                if ( check$automatic_check[i] == TRUE ) {
+                        formattedCheck[i] <- "GO" 
+                } else { formattedCheck[i] <- "NO GO" }
+        }
+
 }
 check$automatic_check <- formattedCheck
+##
+##
 
-check <- check[,c("job_id",
-                  "Costo.Cliente.Final",
-                  "Costo.PRO.Final",
-                  "facturacion",
-                  "margen_previsto",
-                  "Anticipo.Solicitado",
-                  "Ok.Pablo",
-                  "automatic_check")]
 
+
+## formatting and exporting table
+check$"margen_previsto" <- with(check, ( Costo.Cliente.Final - Costo.PRO.Final ) )
+check <- select(check,-(X..a.re.negociar:fact_vs_montoPro))
 
 write.csv(check,"checkAnticipos.csv")
 
 cat("Automated cash payment pay check Finished \n")
 
+#######################################################################################################################
 
