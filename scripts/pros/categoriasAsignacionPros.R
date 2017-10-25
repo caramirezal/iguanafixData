@@ -2,7 +2,10 @@
 
 
 ## reading local files
+## Fuente: https://docs.google.com/a/marbventures.com/spreadsheets/d/1bV5lk96CAp1cmcH1CKtbxwt-cDaEHOYEJSsfQfUKk6Y/edit?usp=sheets_home&ths=true
 pros <- read.csv("~/data/pros/ACTIVEPROS.csv")
+## categorías obtenidas del siguiente dashboard 
+## https://app.periscopedata.com/app/iguanafix/181941/pros-mx-analysis/Categor%C3%ADas-pros?widget=2520482&udv=0&redesign=1
 cat <- read.csv("~/data/pros/Categoraspros_2017-10-25_1341.csv")
 
 ## column definitions
