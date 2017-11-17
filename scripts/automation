@@ -1,0 +1,25 @@
+
+
+## crontab test: date updating every minute and uploading to gdrive
+date > /home/carlos_ramirez/cron_test.txt & /home/carlos_ramirez/gdrive update 0B2I1tf9BPlOddDhFdjM4cHF0Y3c /home/carlos_ramirez/cron_test.txt
+
+##############################################################################################################
+
+## Connection: From periscope to Server
+wget -O /home/carlos_ramirez/data/pagos_pendientes.csv https://app.periscopedata.com/api/iguanafix/chart/csv/8910ea34-53a8-d4c9-944b-b24628d4c9a8
+wget -O /home/carlos_ramirez/data/pagos_mes_actual.csv https://app.periscopedata.com/api/iguanafix/chart/csv/b29a788b-17c4-aef1-e762-d41ac9f6c002
+
+###############################################################################################################
+
+## Data processing:
+#Rscript /home/carlos_ramirez/scripts/iguanafixData/scripts/anticipos/anticipos.R >/dev/null  2>&1
+#mv /home/carlos_ramirez/data/processed_data /home/carlos_ramirez/data/pagos_pendientes.csv
+#rm /home/carlos_ramirez/data/processed_data /home/carlos_ramirez/data/pagos_mes_actual.csv
+
+###############################################################################################################
+
+### Connection: From Server to drive
+/home/carlos_ramirez/gdrive update 1bgPSLu_oSLrSumUhg6wStmC-1FL47H6uz7JI-OXkKKI  /home/carlos_ramirez/data/pagos_pendientes.csv
+/home/carlos_ramirez/gdrive update 1fuu1mEeSR1cyXTn7b1Na6_S7xaxTVp_Wb0pCOWY9s6s  /home/carlos_ramirez/data/pagos_mes_actual.csv
+
+
