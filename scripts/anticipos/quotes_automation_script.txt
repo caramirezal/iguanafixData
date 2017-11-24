@@ -1,0 +1,9 @@
+
+## download MX IVA TEST
+sudo gdrive download -f -r 0B6X77ukS0nCDZlhnaDhvbWtfMk0
+
+## list all files in MX IVA TEST
+sudo gdrive list --query " '0B6X77ukS0nCDZlhnaDhvbWtfMk0' in parents"
+
+
+
