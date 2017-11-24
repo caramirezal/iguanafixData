@@ -1,7 +1,6 @@
 
 
 ## crontab test: date updating every minute and uploading to gdrive
-date > /home/carlos_ramirez/cron_test.txt & /home/carlos_ramirez/gdrive update 0B2I1tf9BPlOddDhFdjM4cHF0Y3c /home/carlos_ramirez/cron_test.txt
 
 ##############################################################################################################
 
@@ -14,7 +13,10 @@ wget -O /home/carlos_ramirez/data/pagos_mes_actual.csv https://app.periscopedata
 ## Data processing:
 #Rscript /home/carlos_ramirez/scripts/iguanafixData/scripts/anticipos/anticipos.R >/dev/null  2>&1
 #mv /home/carlos_ramirez/data/processed_data /home/carlos_ramirez/data/pagos_pendientes.csv
-#rm /home/carlos_ramirez/data/processed_data /home/carlos_ramirez/data/pagos_mes_actual.csv
+## list all files in MX IVA TEST
+/home/carlos_ramirez/gdrive list --query " '0B6X77ukS0nCDZlhnaDhvbWtfMk0' in parents" > /home/carlos_ramirez/MEX_IVA_TEST_list.csv
+cd /home/carlos_ramirez/MX_IVA_TEST
+Rscript /home/carlos_ramirez/automation.R
 
 ###############################################################################################################
 
