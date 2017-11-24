@@ -6,4 +6,9 @@ sudo gdrive download -f -r 0B6X77ukS0nCDZlhnaDhvbWtfMk0
 sudo gdrive list --query " '0B6X77ukS0nCDZlhnaDhvbWtfMk0' in parents"
 
 
-
+extractData <- function(file){
+     quoteLines <- readLines(file)
+     adressIndex <- grep("Domicilio",quoteLines)
+     adressLine <- quoteLines[adressIndex]
+     return(adressLine)
+}
