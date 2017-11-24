@@ -2,6 +2,7 @@
 
 fileNames <- readLines("/home/carlos_ramirez/MEX_IVA_TEST_list.csv")
 fileNames <- gsub(" .*","",fileNames)
+#fileNames <- fileNames[grep(".csv",fileNames)]
 
 #write.csv(fileNames,"/home/carlos_ramirez/MEX_IVA_TEST_list.csv") 
 
@@ -54,8 +55,7 @@ extractQuote <- function(file) {
          return(res)
 }
 
-quotes <- lapply(fileNames, function(x) extractQuote(x) )
+quotes <- lapply(fileNames[1:3], function(x) extractQuote(x) )
 
-write.csv("hola quote","quotes_summary.csv")
-write.csv(as.data.frame(quotes),"output.csv")
+write.table(quotes,"/home/carlos_ramirez/data/output.csv",sep=",")
 
