@@ -1,27 +1,30 @@
-
-#library(dplyr)
-
+library(dplyr)
 
 ###################################################################################################################
 ## Automating cash advance payment check
 
+cat("Starting R script cash advance payment check\n")
 
+## reading anticipos de ventas
 
 
 ## reading anticipos del sistema almacenados en periscope
 ## This table is quickly updated
 url <- "https://app.periscopedata.com/api/iguanafix/chart/csv/f86d75ad-d8af-8aba-f414-ec9fa88e7970"
-check <- read.csv(url)
+check <- read.csv("url")
 
-
-
-check$"margen" <- check$facturacion - check$monto_pro
+## 
+#check$"anticip" <-  ( check$Costo.Cliente.Final + check$Costo.PRO.Final ) / 2
 
 
 ## payment advance checks:
 ## check facturacion > monto pro
-check$"automatic_check" <- check$facturacion >= 1.20*check$monto_pro
+check$"fact_vs_montoPro" <- check$Costo.Cliente.Final >= 1.20*check$Costo.PRO.Final
+## check margen > 10%
+#check$"margen_check" <- with(check, ( Costo.Cliente.Final - Costo.PRO.Final ) / Costo.Cliente.Final ) > 0.1  
 ## formatting check
+#check$"automatic_check" <- with(check, fact_vs_montoPro & margen_check )
+check$automatic_check <- check$fact_vs_montoPro
 formattedCheck <- character(length(check$automatic_check))
 for ( i in 1:length(check$automatic_check)) {
         if ( is.na(check$automatic_check[i] ) ) {
@@ -34,26 +37,18 @@ for ( i in 1:length(check$automatic_check)) {
 
 }
 check$automatic_check <- formattedCheck
-
-write(paste("Check before tags ",date(),sep=" ::: "),file="/home/carlos_ramirez/tracking_r.txt")
-
-check$tags <- sapply(check$tags, function(x) ifelse(grepl("CID",x),
-                                gsub(",.*","",gsub(".*CID","",x)),
-                                NA) )
-
-
-fileName <- paste("/home/carlos_ramirez/data/pagos_",Sys.time(),".csv",sep="")
-fileName <- gsub(" ","_",fileName)
-write.csv(check,fileName)
-system(paste("/home/carlos_ramirez/gdrive upload -p 0B2I1tf9BPlOddGNpSEFaQmZkRU0  ",fileName,sep=""))
+##
+##
 
 
 
+## formatting and exporting table
+check$"margen_previsto" <- with(check, ( Costo.Cliente.Final - Costo.PRO.Final ) )
+check <- select(check,-(X..a.re.negociar:fact_vs_montoPro))
 
-write(paste("Check after system ",date(),sep=" ::: "),file="/home/carlos_ramirez/tracking_r.txt")
+write.csv(check,paste(directorio,"checkAnticipos.csv",sep="/"))
 
-
-
+cat("Automated cash payment pay check Finished \n")
 
 #######################################################################################################################
 
