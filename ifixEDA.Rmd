@@ -1,0 +1,139 @@
+---
+title: "Ifix Explorative Data Analysis"
+author: "BI Ifix"
+date: "November 29, 2017"
+output: html_document
+---
+
+## Abstract
+
+Low percentage of job conversion is a very relevant issue that affects perfomance of sales and operative processes. Therefore, is necessary to implement data driven business to avoid display unfruitful operations which consumes time and operational
+resources. In this report, we implement an explorative data analysis (EDA) on ifix data focused on searching variables which can be used as predictors of successful sales.
+
+
+
+
+## Main goal
+
+ * Find predictors of sale success
+ 
+## Results
+
+### Quote pending times for all countries
+
+We started by focusing in the analysis of pending quotes and prices. The next plot shows the time from the first visit to quote is attached to the ifix platform distributions for the three countries Argentina (ARG), Brazil (BRZ) and Mexico (MXN) on year 2017. From the mean values shown it can be seen that Mexico has the low pending time for quotes. However, it should be considered the fact that Mexico has the lower number of jobs of all the three conutries.  
+
+``` {r echo=FALSE, message=FALSE, warning=FALSE}
+
+library(devtools)
+library(plotFun)
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+
+## 
+timmings <- read.csv("https://app.periscopedata.com/api/iguanafix/chart/csv/00eb5d3c-6c3d-1433-8397-c5e5c4343828")
+
+g <- ggplot(timmings, aes(as.numeric(visit2quote),
+                        fill = as.factor(currency)))
+g <- g + geom_density(alpha = 0.5)
+g <- g + labs(x = 'Time',
+              y = 'Frequency',
+              title = 'Quote pending time',
+              fill = 'Country')
+g <- g + geom_vline(xintercept = c(mean(timmings[timmings$currency=='ARS',"visit2quote"],na.rm = TRUE),
+                                   mean(timmings[timmings$currency=='MXN',"visit2quote"],na.rm = TRUE),
+                                   mean(timmings[timmings$currency=='BRL',"visit2quote"],na.rm = TRUE)),
+                    color = c("pink","steelblue","green"))
+
+g <- g + xlim(-500,2500)
+plot(g)
+``` 
+
+A summary table that includes mean pending times for all countries in the current year is given in the next table.
+
+```{r echo=FALSE}
+sumary.countries <- cbind(summary(timmings[timmings$currency=='ARS',"visit2quote"]),
+                          summary(timmings[timmings$currency=='BRL',"visit2quote"]),
+                          summary(timmings[timmings$currency=='MXN',"visit2quote"]))
+colnames(sumary.countries) <- c('ARGENTINA','BRAZIL','MEXICO')
+sumary.countries
+```
+
+### Corrected pending times by number of jobs
+
+However, as the number of processed orders differs between countries we considered
+the corrected quote pending time rate as the pending time divided by the number of
+group by week. The distribution of the quote pending time rate is shown in the
+next image.
+
+
+
+```{r echo=FALSE,warning=FALSE,comment=FALSE}
+url <- 'https://app.periscopedata.com/api/iguanafix/chart/csv/3468efc3-89d9-fcdf-14f7-5db32d32a845'
+timmings.cor <- read.csv(url)
+
+
+
+g <- ggplot(timmings.cor, aes(as.numeric(mean_corrected),
+                          fill = as.factor(currency)))
+g <- g + geom_density(alpha = 0.5)
+g <- g + labs(x = 'Time',
+              y = 'Frequency',
+              title = 'Quote pending time',
+              fill = 'Country')
+
+g <- g + geom_vline(xintercept = c(mean(timmings.cor[timmings.cor$currency=='ARS',"mean_corrected"],na.rm = TRUE),
+                                   mean(timmings.cor[timmings.cor$currency=='MXN',"mean_corrected"],na.rm = TRUE),
+                                   mean(timmings.cor[timmings.cor$currency=='BRL',"mean_corrected"],na.rm = TRUE)),
+                    color = c("pink","steelblue","green"))
+g <- g + xlim(-20,250)
+plot(g)
+```
+
+From the figure it can be seen that Argentina processes has lower mean quote pending times rates. That is, lower pending time by job that the rest of the countries. The corrected means are shown in the next table.
+
+```{r echo=FALSE}
+summary.countries <- cbind(summary(timmings.cor[timmings.cor$currency=='ARS',
+                                           "mean_corrected"]),
+                          summary(timmings.cor[timmings.cor$currency=='BRL',
+                                           "mean_corrected"]),
+                          summary(timmings.cor[timmings.cor$currency=='MXN',
+                                           "mean_corrected"]))
+colnames(summary.countries) <- c('ARGENTINA','BRAZIL','MEXICO')
+summary.countries
+
+```
+
+A possible interpretation for quote pending rates is that Argentina performs
+approximately 4 and 8 times faster quotes per job than Mexico and Brazil, respectively.
+
+
+## Mexico pending times 
+
+We went further and examined pending times for different steps of the ifix process. Pending times distribution from the creation of the visit order to the creation
+of the order of the project and from this time to the date of the project
+are ahown in the next figure.
+
+```{r echo=FALSE, warning=FALSE,message=FALSE}
+
+mex <- filter(timmings,currency=='MXN')
+
+ordvisit2ord.sum <- summary(mex$ordvisit2ord)
+ord2project.sum <- summary(mex$ord2project)
+
+timmings.mx <- mutate(mex,
+                      ordvisit2ord_desp=ordvisit2ord,
+                      ord2project_desp=ord2project + ord2project.sum['Median'])
+
+timmings.mx <- select(timmings.mx,
+                      ordvisit2ord_desp:ord2project_desp)
+colnames(timmings.mx) <- c("orderVisit_to_ordProject",
+                           "ord_to_Project")
+
+g <- mhist(timmings.mx)
+g <- g + xlim(-600,1000)
+g
+
+```
+

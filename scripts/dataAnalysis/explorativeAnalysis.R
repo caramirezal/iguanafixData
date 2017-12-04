@@ -1,0 +1,77 @@
+library(devtools)
+library(plotFun)
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+
+
+###################################################################################
+## Timmings explorative analysis
+
+
+timmings <- read.csv("https://app.periscopedata.com/api/iguanafix/chart/csv/00eb5d3c-6c3d-1433-8397-c5e5c4343828")
+
+
+
+g <- ggplot(timmings, aes(as.numeric(visit2quote),
+                        fill = as.factor(currency)))
+g <- g + geom_density(alpha = 0.5)
+g <- g + labs(x = 'Time',
+              y = 'Frequency',
+              title = 'Quote pending time',
+              fill = 'Country')
+
+g <- g + geom_vline(xintercept = c(mean(timmings[timmings$currency=='ARS',"visit2quote"],na.rm = TRUE),
+                                   mean(timmings[timmings$currency=='MXN',"visit2quote"],na.rm = TRUE),
+                                   mean(timmings[timmings$currency=='BRL',"visit2quote"],na.rm = TRUE)),
+                    color = c("pink","steelblue","green"))
+
+
+sumary.countries <- cbind(summary(timmings[timmings$currency=='ARS',"visit2quote"]),
+                          summary(timmings[timmings$currency=='BRL',"visit2quote"]),
+                          summary(timmings[timmings$currency=='MXN',"visit2quote"]))
+colnames(sumary.countries) <- c('ARS','BRL','MXN')
+
+###################################################################################
+## Correction by number of quotes
+url <- 'https://app.periscopedata.com/api/iguanafix/chart/csv/3468efc3-89d9-fcdf-14f7-5db32d32a845'
+timmings.cor <- read.csv(url)
+
+
+
+g <- ggplot(timmings.cor, aes(as.numeric(mean_corrected),
+                          fill = as.factor(currency)))
+g <- g + geom_density(alpha = 0.5)
+g <- g + labs(x = 'Time',
+              y = 'Frequency',
+              title = 'Quote pending time',
+              fill = 'Country')
+
+g <- g + geom_vline(xintercept = c(mean(timmings.cor[timmings.cor$currency=='ARS',"mean_corrected"],na.rm = TRUE),
+                                   mean(timmings.cor[timmings.cor$currency=='MXN',"mean_corrected"],na.rm = TRUE),
+                                   mean(timmings.cor[timmings.cor$currency=='BRL',"mean_corrected"],na.rm = TRUE)),
+                    color = c("pink","steelblue","green"))
+g <- g + xlim(-20,250)
+plot(g)
+
+###################################################################################
+mex <- filter(timmings,currency=='MXN')
+
+ordvisit2ord.sum <- summary(mex$ordvisit2ord)
+ord2project.sum <- summary(mex$ord2project)
+
+timmings.mx <- mutate(mex,
+                      ordvisit2ord_desp=ordvisit2ord,
+                      ord2project_desp=ord2project + ordvisit2ord.sum['Median'])
+
+timmings.mx <- select(timmings.mx,
+                      ordvisit2ord_desp:ord2project_desp)
+colnames(timmings.mx) <- c("orderVisit2ordProject",
+                           "ord2Project")
+
+g <- mhist(timmings.mx)
+g <- g + xlim(-600,1000)
+g
+
+
+##################################################################################
