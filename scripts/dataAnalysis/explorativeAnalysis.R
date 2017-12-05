@@ -75,3 +75,20 @@ g
 
 
 ##################################################################################
+## plotting timmings as boxplots
+
+timmings.mx <- filter(timmings,currency=='MXN')
+timmings.mx <- filter(timmings.mx,0 < visit2quote)
+timmings.mx <- filter(timmings.mx,0 < ordvisit2ord)
+timmings.mx <- filter(timmings.mx,0 < ord2project)
+timmings.mx <- filter(timmings.mx,0 < paid2project)
+timmings.mx <- select(timmings.mx, visit2quote:paid2project)
+timmings.melt <- melt(timmings.mx)
+
+theme_set(theme_classic())
+g <- ggplot(timmings.melt, aes(x=variable,y=log(value+1))) 
+g <- g + geom_boxplot(aes(fill=factor(variable)))
+g <- g + labs(title='Timmins per ifix step',
+              x='Ifix Step',
+              y='Log(Pending time)')
+plot(g)
