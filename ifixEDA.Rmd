@@ -118,18 +118,17 @@ of the order of the project and from this time to the date of the custom project
 
 timmings.mex <- filter(timmings,currency=='MXN')
 
-mex <- select(timmings.mex,ordvisit2ord:ord2project)
-colnames(mex) <- c("orderVisit_to_ordProject",
-                           "ord_to_Project")
+mex <- select(timmings.mex,visit2quote:paid2project)
+
 
 g <- mhist(mex)
 g <- g + xlim(-600,1000)
 g <- g + labs(x = 'Time',
               y = 'Frequency',
               fill = 'Time step')
-g <- g + geom_vline(xintercept = c(mean(mex[,"orderVisit_to_ordProject"],
+g <- g + geom_vline(xintercept = c(mean(mex[,"visit2quote"],
                                         na.rm = TRUE),
-                                   mean(mex[,"ord_to_Project"],
+                                   mean(mex[,"ord2project"],
                                         na.rm = TRUE) ), 
                     color = c('pink','steelblue'))
 g
@@ -139,9 +138,20 @@ From the figure and the table it can be shown that mean pending time from order
 creation to the custom project visit is lower than the time from visit to custom project order creation. A summary of the mean times is given in the next table.
 
 ```{r echo=FALSE}
-ordvisit2ord.sum <- summary(mex$orderVisit_to_ordProject)
-ord2project.sum <- summary(mex$ord_to_Project)
-timmming.sum <- cbind(ordvisit2ord.sum,ord2project.sum)
+
+visit2quote.sum <- summary(mex$visit2quote)
+ordvisit2ord.sum <- summary(mex$ordvisit2ord)
+ord2project.sum <- summary(mex$ord2project)
+paid2project.sum <- summary(mex$paid2project)
+timmming.sum <- cbind(ordvisit2ord.sum,ord2project.sum,visit2quote.sum,paid2project.sum)
 timmming.sum
 ```
 
+## Conclusions
+
+In this report we analyzed pending times for several ifix bussinnes steps. We could observe that Mexico has lower mean
+time for quote definition. However, Argentina has lower mean pending time rate for quotes by job. In the case of Mexico,
+when analyzing pending times for different bussinness ifix steps and observed that quote definition has the high mean 
+pending time value. At the other hand, the process from paid to project realization of custom projects had the lowest
+mean pending time. Finally, when mean pending times are evaluated it can be seen that Plomero (plumbing) and Limpieza (cleanning) has low and high mean times, respectively. These two categories had also different distributions when tested
+by a statistical t-test. Therefore, the next step is to evaluate how mean pending times affect sales conversion. 
