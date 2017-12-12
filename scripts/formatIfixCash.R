@@ -35,11 +35,14 @@ cashIfix$date <- dates
 for ( i in 1:(ncol(cashIfix)-1) )  {
         cashIfix[,i] <- as.numeric(gsub(',','',cashIfix[,i]))
 } 
+
+cashIfix[is.na(cashIfix)]  <- 0
                       
-colnames(cashIfix) <- gsub(' ','',colnames(cashIfix))               
-colnames(cashIfix) <- gsub('-','',colnames(cashIfix))  
-colnames(cashIfix) <- gsub('&','',colnames(cashIfix)) 
-colnames(cashIfix) <- gsub('(','',colnames(cashIfix))
-colnames(cashIfix) <- gsub(')','',colnames(cashIfix)) 
+colnames(cashIfix) <- gsub(' ','',colnames(cashIfix))
+colnames(cashIfix) <- gsub(',','',colnames(cashIfix)) 
+colnames(cashIfix) <- gsub('\\-','',colnames(cashIfix))  
+colnames(cashIfix) <- gsub('\\&','',colnames(cashIfix)) 
+colnames(cashIfix) <- gsub('\\(','',colnames(cashIfix))
+colnames(cashIfix) <- gsub('\\)','',colnames(cashIfix)) 
 
 write.csv(cashIfix,'cashIfix2017.csv',row.names = FALSE)
