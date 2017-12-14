@@ -127,7 +127,8 @@ g <- ggplot(timmings.melt, aes(x=variable,y=log(value+1)))
 g <- g + geom_boxplot(aes(fill=factor(variable)))
 g <- g + labs(title='Timmins per ifix step',
               x='Ifix Step',
-              y='Log(Pending time)')
+              y='Log(Pending time)',
+              fill='ifix Step')
 plot(g)
 
 mex <- filter(timmings,currency=='MXN')
