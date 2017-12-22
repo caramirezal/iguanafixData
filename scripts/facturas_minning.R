@@ -1,5 +1,5 @@
 
-dir <- "/Users/carlos/Dropbox/facturas/"
+dir <- "/Users/carlos/Dropbox/facturas_txt/"
 facturas <- list.files(dir)
 
 total <- rep('0',length(facturas))
@@ -10,7 +10,7 @@ cliente <- rep('NA',length(facturas))
 
 for (i in 1:length(facturas)) {
         docLines <- readLines(paste(dir,facturas[i],sep=""))
-        fecha[i] <- grep("2017",docLines,value=TRUE)[1]
+        fecha[i] <- grep("201",docLines,value=TRUE)[1]
         total[i] <- grep("TOTAL",docLines,value=TRUE)[2]
         jobIds[i] <- ifelse(length(grep("job|no trabajo",tolower(docLines)))>0
                             ,grep("job|no trabajo",tolower(docLines),value=TRUE)
@@ -42,9 +42,10 @@ res$job_id <- gsub("cotizacionww","",res$job_id)
 res$"order_id" <- gsub(".*order","",orderIds)
 res$order_id <- gsub(" ","",res$order_id)
 res$order_id <- gsub(".*:","",res$order_id)
+res$order_id <- gsub("noorden","",res$order_id)
 res$"client" <- gsub("cliente: ","",cliente)
 res$date[is.na(res$date)] <- ''
-
+res$"file_name" <- gsub(".txt","",facturas)
 
 write.csv(res,
           "~/GitHub/iguanafixData/data/facturacionMX.csv",

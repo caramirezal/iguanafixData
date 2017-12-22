@@ -1,0 +1,36 @@
+---
+title: "Data Driven Business"
+author: "Carlos Ramírez"
+date: "December 18, 2017"
+output: html_document
+---
+
+
+## Intro
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+## loading data from ifix model and timmings (chart Cumulative categoria )
+url <- 'https://app.periscopedata.com/api/iguanafix/chart/csv/e5489dfe-e216-c950-6979-8b2e26f7e996/322144'
+revenues <- read.csv(file=url)
+revenues <- arrange(revenues,desc(facturacion))
+revenues <- mutate(revenues, categoria=factor(categoria,levels=categoria))
+revenues <- mutate(revenues,cumulative=cumsum(facturacion))
+revenues <- mutate(revenues,facturacionPerc= 100.0*facturacion/sum(facturacion))
+revenues <- mutate(revenues,cumulativePerc=100.0*cumulative/sum(facturacion))
+revenues <- revenues[1:12,]
+
+theme_set(theme_classic())
+g <- ggplot(revenues,aes(x=categoria,y=cumulativePerc,group=1)) + geom_area(color='green',fill='green')
+g <- g + geom_bar(data=revenues,aes(x=categoria,y=facturacionPerc,fill=categoria),stat='identity')
+g <- g + theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+g <- g + labs(y='GMV Percentage',title='Categories Pareto Chart')
+g
+```
+
+```{r}
+```
+
