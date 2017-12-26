@@ -1,14 +1,27 @@
 ---
 title: "Data Driven Business"
-author: "Carlos Ramírez"
+author: "Carlos Ram\'irez"
 date: "December 18, 2017"
-output: html_document
+output:
+  html_document: default
 ---
 
 
 ## Intro
 
-```{r}
+The aim of this report is to find the main variables associated to business 
+performance for the implementation of data driven decisions. 
+
+
+## Results 
+
+To simplify the analysis and avoid variable confusors we focused in the top 9
+categories which accounts for the 80 percenatge of sales in the last year, further referred as the Pareto categories. This categories are comprised by Albanil, Plomero, Carpintero, Impermeablizador, Tablaroca y recubrimiento,
+Pintor, Reparaci\'on de L\'inea Blanca y Electricista as shown in the next figure. 
+
+
+```{r echo=FALSE,message=FALSE}
+
 library(dplyr)
 library(ggplot2)
 
@@ -27,10 +40,16 @@ g <- ggplot(revenues,aes(x=categoria,y=cumulativePerc,group=1)) + geom_area(colo
 g <- g + geom_bar(data=revenues,aes(x=categoria,y=facturacionPerc,fill=categoria),stat='identity')
 g <- g + theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
-g <- g + labs(y='GMV Percentage',title='Categories Pareto Chart')
+g <- g + labs(y='GMV Percentage',title='Pareto Categories')
 g
 ```
 
 ```{r}
+library(dplyr)
+url <- 'https://app.periscopedata.com/api/iguanafix/chart/csv/4c63dbb5-90c0-a945-d767-09970e05f738'
+revenues <- read.csv(file=url)
+revenues$
+plomero <- filter(revenues,categoria=='Plomero')
+hyst(plomero$Facturacion)
 ```
 
