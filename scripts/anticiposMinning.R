@@ -1,23 +1,27 @@
-library(dplyr) 
+library(dplyr)
+
+## extracting names from xlsx files
 setwd("~/scripts/iguanafixData/data/Sent/")
 fileNames <- list.files()
 csvs <- gsub(".xlsx",".csv",fileNames)
-head(csvs)
 
+## Applying ssconvert to convert xlsx to csv
 for (i in 1:length(fileNames)) {
     command <- paste("ssconvert '",fileNames[i],"' '",csvs[i],"'",sep = "")
     system(command)
 }
 
+## moving csvs to a single file for convinience
 command <- "mv *.csv ~/scripts/iguanafixData/data/anticipos_txt"
 system(command)
 
-
+## moving to the file containing the csvs
 setwd("~/scripts/iguanafixData/data/anticipos_txt/")
 fileNames <- list.files("~/scripts/iguanafixData/data/anticipos_txt/")
 
 lines <- readLines(fileNames[1])
 
+## extract id job
 extractJobId <- function(csv) {
         lines <- readLines(csv)
         jobId <- lines[grepl("de Trabajo",lines)][1]
@@ -27,6 +31,7 @@ extractJobId <- function(csv) {
         jobId        
 }
 
+## extract client name
 extractClientId <- function(csv){
         csv <- readLines(csv)
         clienteId <- csv[grepl("Cliente",csv)][1]
@@ -37,6 +42,7 @@ extractClientId <- function(csv){
         clienteId        
 }
 
+## extract total price
 extractTotal <- function(csv){
         lines <- readLines(csv)
         total <- lines[grepl("IMPORTE TOTAL",lines)][1]
@@ -46,6 +52,7 @@ extractTotal <- function(csv){
         total
 }
 
+## extract pro price
 extractMontoPro <- function(csv){
         lines <- readLines(csv)
         montoPro <- lines[grepl("Mano de obra",lines)][1]
@@ -58,6 +65,7 @@ extractMontoPro <- function(csv){
         montoPro
 }
 
+## extract date
 extractDate <- function(csv){
         lines <- readLines(csv)
         date <- lines[grepl("Domicilio",lines)][1]
@@ -70,6 +78,8 @@ extractDate <- function(csv){
         date
 }
 
+
+## formatting extracted data
 date <- sapply(fileNames,function(i) extractDate(i))
 jobIds <- sapply(fileNames,function(i) extractJobId(i))
 jobIds <- as.numeric(as.character(jobIds))
@@ -80,6 +90,7 @@ totals <- as.numeric(as.character(totals))
 totals[is.na(totals)] <- 0
 montoPro <- sapply(fileNames, function(i) extractMontoPro(i))
         
+## definition of the resume table
 res <- data.frame("date"=date,
                   "job_id"=jobIds,
                   "client"=clientIds,
@@ -87,6 +98,8 @@ res <- data.frame("date"=date,
                   "montoPro"=montoPro,
                   "file"=fileNames)
 
+## storing the result
+## This table is called quotes_mx in periscopedata
 write.csv(res,
           file="~/scripts/iguanafixData/data/anticipos.csv",
           row.names = FALSE)
