@@ -1,0 +1,186 @@
+---
+title: "Pending times"
+author: "Carlos Ram?rez"
+date: "December 5, 2017"
+output:
+  word_document: default
+  html_document: default
+---
+
+# Abstract
+
+Pending times are very important for customer experience and fidelity. Hence, in this EDA report we analyze
+pending times for bussiness step processes in order to monitore and evaluate businness steps
+performance.
+
+
+# Results
+
+## Mexico has a lower mean quote pending time 
+
+We started by focusing in the analysis of pending quotes. The next plot shows the time from the first visit to quote is attached to the ifix platform distributions for the three countries Argentina (ARG), Brazil (BRZ) and Mexico (MXN) on year 2017. From the mean values shown it can be seen that Mexico has the low pending time for quote definition (140 hours ~ 6 days). However, it should be considered the fact that Mexico has the lower number of jobs of all the three countries.
+
+``` {r echo=FALSE, message=FALSE, warning=FALSE}
+
+library(devtools)
+library(plotFun)
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+
+## 
+timmings <- read.csv("https://app.periscopedata.com/api/iguanafix/chart/csv/00eb5d3c-6c3d-1433-8397-c5e5c4343828")
+
+g <- ggplot(timmings, aes(as.numeric(visit2quote),
+                        fill = as.factor(currency)))
+g <- g + geom_density(alpha = 0.5)
+g <- g + labs(x = 'Time',
+              y = 'Frequency',
+              title = '',
+              fill = 'Country')
+g <- g + geom_vline(xintercept = c(mean(timmings[timmings$currency=='ARS',"visit2quote"],na.rm = TRUE),
+                                   mean(timmings[timmings$currency=='MXN',"visit2quote"],na.rm = TRUE),
+                                   mean(timmings[timmings$currency=='BRL',"visit2quote"],na.rm = TRUE)),
+                    color = c("pink","steelblue","green"))
+
+g <- g + xlim(-500,2500)
+plot(g)
+``` 
+
+A summary table that includes mean pending times for all countries in the current year is given in the next table.
+
+```{r echo=FALSE}
+sumary.countries <- cbind(summary(timmings[timmings$currency=='ARS',"visit2quote"]),
+                          summary(timmings[timmings$currency=='BRL',"visit2quote"]),
+                          summary(timmings[timmings$currency=='MXN',"visit2quote"]))
+colnames(sumary.countries) <- c('ARGENTINA','BRAZIL','MEXICO')
+sumary.countries
+```
+
+
+## Argentina has a better quote pending time rate by job
+
+However, as the number of processed orders differs between countries we considered
+the corrected quote pending time rate as the pending time divided by the number of
+group by week. The distribution of the quote pending time rate is shown in the
+next image.
+
+
+
+```{r echo=FALSE,warning=FALSE,comment=FALSE}
+url <- 'https://app.periscopedata.com/api/iguanafix/chart/csv/3468efc3-89d9-fcdf-14f7-5db32d32a845'
+timmings.cor <- read.csv(url)
+
+
+
+g <- ggplot(timmings.cor, aes(as.numeric(mean_corrected),
+                          fill = as.factor(currency)))
+g <- g + geom_density(alpha = 0.5)
+g <- g + labs(x = 'Time',
+              y = 'Frequency',
+              title = '',
+              fill = 'Country')
+
+g <- g + geom_vline(xintercept = c(mean(timmings.cor[timmings.cor$currency=='ARS',"mean_corrected"],na.rm = TRUE),
+                                   mean(timmings.cor[timmings.cor$currency=='MXN',"mean_corrected"],na.rm = TRUE),
+                                   mean(timmings.cor[timmings.cor$currency=='BRL',"mean_corrected"],na.rm = TRUE)),
+                    color = c("pink","steelblue","green"))
+g <- g + xlim(-20,250)
+plot(g)
+```
+
+From the figure it can be seen that Argentina processes has lower mean quote pending times rates (5 hours per job). That is, lower pending time by job that the rest of the countries. The corrected means are shown in the next table. 
+
+```{r echo=FALSE}
+summary.countries <- cbind(summary(timmings.cor[timmings.cor$currency=='ARS',
+                                           "mean_corrected"]),
+                          summary(timmings.cor[timmings.cor$currency=='BRL',
+                                           "mean_corrected"]),
+                          summary(timmings.cor[timmings.cor$currency=='MXN',
+                                           "mean_corrected"]))
+colnames(summary.countries) <- c('ARGENTINA','BRAZIL','MEXICO')
+summary.countries
+
+```
+
+A possible interpretation for quote pending rates is that Argentina performs
+approximately 6 and 10 times faster quotes per job than Mexico and Brazil, respectively.
+
+
+## Pending time across process steps
+
+We went further and examined pending times for different steps of the ifix process. The logarithm of the pending times are shown in the next figure, it can be seen that the process from visit to quote pdf attachment to ifix platform has the biggest mean pending time (267 hours ~ 11 days) of all the process steps in 2017. However, all steps have much variation 
+(from 3 to 124, taking exponents). The time from payment to the initiation of the custom project has the lower mean values (142 hours ~ 6 days). 
+
+```{r echo=FALSE, message=FALSE}
+
+timmings.mex <- filter(timmings,currency=='MXN')
+
+timmings.mx <- filter(timmings,currency=='MXN')
+timmings.mx <- filter(timmings.mx,0 < visit2quote)
+timmings.mx <- filter(timmings.mx,0 < ordvisit2ord)
+timmings.mx <- filter(timmings.mx,0 < ord2project)
+timmings.mx <- filter(timmings.mx,0 < paid2project)
+timmings.mx <- select(timmings.mx, visit2quote:paid2project)
+timmings.melt <- melt(timmings.mx)
+
+theme_set(theme_classic())
+g <- ggplot(timmings.melt, aes(x=variable,y=log(value+1))) 
+g <- g + geom_boxplot(aes(fill=factor(variable)))
+g <- g + labs(title='Timmins per ifix step',
+              x='Ifix Step',
+              y='Log(Pending time)',
+              fill='ifix Step')
+plot(g)
+
+mex <- filter(timmings,currency=='MXN')
+
+
+visit2quote.sum <- summary(mex$visit2quote)
+ordvisit2ord.sum <- summary(mex$ordvisit2ord)
+ord2project.sum <- summary(mex$ord2project)
+paid2project.sum <- summary(mex$paid2project)
+timmming.sum <- cbind(ordvisit2ord.sum,ord2project.sum,visit2quote.sum,paid2project.sum)
+timmming.sum
+```
+
+## Pending times across categories
+
+In the following figure pending times (logs) by categories are shown. It can be seen that Limpieza (cleanning)
+has low pending times and also a lot of variation in time values. At the other hand Plomero (plumbing) has low pending time. These two categories distributions differs in a unpaired t-test with a p-value = 4.496e-08 statistical test. 
+
+```{r echo=FALSE, message=FALSE}
+timmings.mex <- filter(timmings,currency=='MXN')
+timmings.mx <- filter(timmings.mex,0 < visit2quote)
+timmings.mx <- select(timmings.mx, category:visit2quote)
+timmings.melt <- melt(timmings.mx)
+
+theme_set(theme_classic())
+g <- ggplot(timmings.melt, aes(x=category,y=log(value+1))) 
+g <- g + geom_boxplot(aes(fill=factor(category)))
+g <- g + labs(title='Timmins per ifix step',
+              x='Categories',
+              y='Log(Pending time)',
+              fill='Category')
+g <- g + theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+plot(g)
+
+
+```
+
+
+``` {r echo=FALSE}
+test <-  t.test(timmings.mx[timmings.mx$category=='Decorador','visit2quote'],
+                timmings.mx[timmings.mx$category=='Plomero','visit2quote'])
+test
+```
+
+## Conclusions
+
+In this report we analyzed pending times for several ifix bussinnes steps. We could observe that Mexico has lower mean
+time for quote definition. However, Argentina has lower mean pending time rate for quotes by job. In the case of Mexico,
+when analyzing pending times for different bussinness ifix steps and observed that quote definition has the high mean 
+pending time value. At the other hand, the process from paid to project realization of custom projects had the lowest
+mean pending time. Finally, when mean pending times are evaluated it can be seen that Plomero (plumbing) and Limpieza (cleanning) has low and high mean times, respectively. These two categories had also different distributions when tested
+by a statistical t-test. Therefore, the next step is to evaluate how mean pending times affect sales conversion. 
