@@ -1,0 +1,44 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+## Background
+
+At the present time we have a Marketing Dashboard on periscopedata plataform summarizing the
+actual number of conversions by lead source and campaign. However, it is necessary to 
+develop a better method to know whether a specific source or campaign sucess. In this report,
+we try to implement a framework to evaluate source or campaign sucess performance.
+
+## Results
+
+
+
+```{r echo=FALSE,message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+
+leads <- read.csv("https://app.periscopedata.com/api/iguanafix/chart/csv/a50739aa-9f2a-9c1d-adf2-8612451f47f6/328445")
+leads <- mutate(leads,sucess=as.factor(sucess))
+
+par(mfrow=c(1,2))
+g <- ggplot(leads[gsub(".com.*",".com",leads$trk_source)=='www.google.com',],aes(x=sucess,y=counter,fill=sucess))
+g <- g + geom_violin(trim=FALSE)
+g <- g + geom_dotplot(binaxis = 'y',stackdir = 'center',dotsize = 0.5,fill='black')
+g <- g + labs(x="Sucess/Failure",y="Frequency of events",title='Google Leads Sucess')
+g <- g + guides(fill=FALSE)
+g1 <- g + coord_flip()
+
+
+g <- ggplot(leads[tolower(leads$trk_source)=='facebook',],aes(x=sucess,y=counter,fill=sucess))
+g <- g + geom_violin(trim=FALSE)
+g <- g + geom_dotplot(binaxis = 'y',stackdir = 'center',dotsize = 0.5,fill='black')
+g <- g + labs(x="Sucess/Failure",y="",title='Facebook Leads Sucess')
+g2 <- g + coord_flip()
+grid.arrange(g1,g2,ncol=2)
+
+```
