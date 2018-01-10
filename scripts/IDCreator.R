@@ -7,7 +7,7 @@
 
 library(dplyr)
 
-puebla <- read.csv("DataGeograficaPuebla.csv",stringsAsFactors = FALSE)
+puebla <- read.csv("/Users/carlos/Documents/GitHub/iguanafixData/data/DataGeograficaPuebla.csv",stringsAsFactors = FALSE)
 
 ## removing duplicated rows 
 puebla <- puebla[!duplicated(puebla),]

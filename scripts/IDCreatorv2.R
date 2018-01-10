@@ -10,16 +10,27 @@ names(localidades) <- c("no","entidad","entidad_nombre","clave_distrito_electora
 localidades <- localidades[2:(nrow(localidades)-2),]
 localidades <- localidades[,2:(ncol(localidades)-2)]
 
-localidades.data <- localidades[,c("entidad_nombre",
-                                   "nombre_municipio",
-                                   "nombre_colonia")]
+puebla <- localidades[,c("entidad_nombre",
+                         "nombre_municipio",
+                         "nombre_colonia")]
 
-localidades.data <- mutate(localidades.data,
-                           preprocessed=paste(entidad_nombre,
+puebla <- mutate(puebla,filteredColonia=paste(entidad_nombre,
                                               nombre_municipio,
                                               nombre_colonia,sep=""))
 
-localidades.data <- localidades.data[!duplicated(localidades.data),]
+puebla <- puebla[!duplicated(puebla),]
+
+## getting first part of the name
+puebla$firstName <- substr(puebla$nombre_colonia,1,3)
+
+## obtaining second part of the name
+puebla$secName <- gsub("^LA","",puebla$filteredColonia)
+puebla$secName <- gsub("^EL","",puebla$secName)
+puebla$secName <- gsub("^SANTO","",puebla$secName)
+puebla$secName <- gsub("^SANTA","",puebla$secName)
+puebla$secName <- gsub("^SAN","",puebla$secName)
+
+
 
 
 ## convert string to upper characters in ASCII format, with no
@@ -34,8 +45,6 @@ filterStrings <- function(string){
         filteredString
 } 
 
-localidades.data <- mutate(localidades.data,
-                           preprocessed=filterStrings(preprocessed))
 
 
 
