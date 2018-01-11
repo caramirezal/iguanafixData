@@ -10,12 +10,14 @@ filterStrings <- function(string){
         filteredString <- gsub("\\)","",filteredString)
         filteredString <- iconv(filteredString, to="ASCII//TRANSLIT")
         filteredString <- toupper(filteredString)
-        filteredString <- gsub("[^[:alpha:] ]","",filteredString)
+        filteredString <- gsub("[^[:alpha:]]","",filteredString)
         filteredString
 } 
 
 localidades <- read.csv("/Users/carlos/Downloads/CATALOGO_DE_COLONIAS_ Y_LOCALIDADES_POR_DTTO_LOCAL_2017.csv",
                          skip=5, header = TRUE)
+
+localidades <- localidades[!duplicated(localidades),]
 
 names(localidades) <- c("no","entidad","entidad_nombre","clave_distrito_electoral",
                         "Cabecera_distrital","seccion","municipio","nombre_municipio",
@@ -28,9 +30,11 @@ puebla <- localidades[,c("entidad_nombre",
                          "nombre_municipio",
                          "nombre_colonia")]
 
+puebla <- puebla[!duplicated(puebla),]
+
 puebla <- mutate(puebla,filteredColonia=filterStrings(nombre_colonia))
 
-puebla <- puebla[!duplicated(puebla),]
+
 
 ## getting first part of the name
 puebla$firstName <- substr(puebla$nombre_colonia,1,3)
@@ -238,6 +242,78 @@ for (i in 1:length(puebla$Estado)) {
                                         newId <- paste(LETTERS[j],
                                                        LETTERS[k],sep="")
                                         newId <- paste("PB.PB",newId,sep=".")
+                                        allreadyInBag <- newId %in% bag
+                                        if ( ! allreadyInBag ) {
+                                                bag <- c(bag,newId)
+                                                puebla$id[i] <- newId 
+                                                cat(i, newId,"\n")
+                                                break 
+                                        }
+                                }
+                                if (  ! allreadyInBag ) break
+                        }
+                }
+                ## using PB.PU for state and municipio
+                ## and initial of first and second name
+                allreadyInBag <- newId %in% bag
+                if ( allreadyInBag ) {
+                        for (j in 1:nchar(puebla$secName[i])) {
+                                newId <- paste(firstInitial,
+                                               substr(puebla$secName[i],j,j),sep="")
+                                newId <- paste("PB.PU",newId,sep=".")
+                                allreadyInBag <- newId %in% bag
+                                if ( ! allreadyInBag ) {
+                                        bag <- c(bag,newId)
+                                        puebla$id[i] <- newId 
+                                        cat(i, newId,"\n")
+                                        break 
+                                }
+                        }
+                }
+                ## using any letter after PB.PU
+                allreadyInBag <- newId %in% bag
+                if ( allreadyInBag ) {
+                        for (j in 1:length(LETTERS)) {
+                                for (k in 1:length(LETTERS)) {
+                                        newId <- paste(LETTERS[j],
+                                                       LETTERS[k],sep="")
+                                        newId <- paste("PB.PU",newId,sep=".")
+                                        allreadyInBag <- newId %in% bag
+                                        if ( ! allreadyInBag ) {
+                                                bag <- c(bag,newId)
+                                                puebla$id[i] <- newId 
+                                                cat(i, newId,"\n")
+                                                break 
+                                        }
+                                }
+                                if (  ! allreadyInBag ) break
+                        }
+                }
+                ## using PU.PA for state and municipio
+                ## and initial of first and second name
+                allreadyInBag <- newId %in% bag
+                if ( allreadyInBag ) {
+                        for (j in 1:nchar(puebla$secName[i])) {
+                                newId <- paste(firstInitial,
+                                               substr(puebla$secName[i],j,j),sep="")
+                                newId <- paste("PU.PA",newId,sep=".")
+                                allreadyInBag <- newId %in% bag
+                                if ( ! allreadyInBag ) {
+                                        bag <- c(bag,newId)
+                                        puebla$id[i] <- newId 
+                                        cat(i, newId,"\n")
+                                        break 
+                                }
+                        }
+                }
+                ## using any letter after PU.PA
+                allreadyInBag <- newId %in% bag
+                if ( allreadyInBag ) {
+                        for (j in 1:length(LETTERS)) {
+                                for (k in 1:length(LETTERS)) {
+                                        newId <- paste(LETTERS[j],
+                                                       LETTERS[k],sep="")
+                                        newId <- paste("PU.PA",newId,sep=".")
                                         allreadyInBag <- newId %in% bag
                                         if ( ! allreadyInBag ) {
                                                 bag <- c(bag,newId)
