@@ -8,28 +8,31 @@ filterStrings <- function(string){
         filteredString <- gsub(" ","",string)
         filteredString <- gsub("\\(","",filteredString)
         filteredString <- gsub("\\)","",filteredString)
+        filteredString <- gsub("<e1>loc","",filteredString)
         filteredString <- iconv(filteredString, to="ASCII//TRANSLIT")
-        filteredString <- toupper(filteredString)
         filteredString <- gsub("[^[:alpha:]]","",filteredString)
+        filteredString <- toupper(filteredString)
         filteredString
 } 
 
-localidades <- read.csv("/Users/carlos/Downloads/Puebla.txt",
+localidades <- read.csv("~/Downloads/Tlaxcala.txt",
                         sep = "|",
                         skip = 1)
 
 localidades <- localidades[!duplicated(localidades),]
 
-names(localidades) <- c("no","entidad","entidad_nombre","clave_distrito_electoral",
-                        "Cabecera_distrital","seccion","municipio","nombre_municipio",
-                        "tipo_colonia","nombre_colonia","codigo_postal")
+#names(localidades) <- c("no","entidad","entidad_nombre","clave_distrito_electoral",
+#                        "Cabecera_distrital","seccion","municipio","nombre_municipio",
+#                        "tipo_colonia","nombre_colonia","codigo_postal")
 
-localidades <- localidades[2:(nrow(localidades)-2),]
-localidades <- localidades[,2:(ncol(localidades)-2)]
+#localidades <- localidades[2:(nrow(localidades)-2),]
+#localidades <- localidades[,2:(ncol(localidades)-2)]
 
-puebla <- localidades[,c("d_asenta",
+puebla <- localidades[,c("d_estado",
                          "D_mnpio",
-                         "d_ciudad")]
+                         "d_asenta")]
+
+names(puebla) <- c("entidad_nombre","nombre_municipio","nombre_colonia")
 
 puebla <- puebla[!duplicated(puebla),]
 
