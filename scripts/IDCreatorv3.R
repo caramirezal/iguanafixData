@@ -62,25 +62,85 @@ puebla <- mutate(puebla,preprocessed=paste(estadoId,municipioId,coloniaId,sep=""
 puebla <- mutate(puebla, concatenate=paste(Estado,Municipio,Colonia,sep=""))
 
 
-bag <- puebla$preprocessed[1]
-for (i in 2:nrow(puebla)) {
-        allreadyInBag <- puebla$preprocessed[i] %in% bag
+bag <- NULL
+puebla$id <- "-"
+for (i in 1:length(puebla$Estado)) {
+        ## try to assign first and second initial
+        ## to .CO part of the ID
+        firstInitial <- substr(puebla$firstName[i],1,1)
+        secondInitial <- substr(puebla$secName[i],1,1)
+        newId <- paste(firstInitial,secondInitial,sep="")
+        newId <- paste(puebla$region[i],newId,sep=".")
+        allreadyInBag <- newId %in% bag
         if ( ! allreadyInBag ) {
-                bag <- c(bag,puebla$preprocessed[i])
+                bag <- c(bag,newId)
+                puebla$id[i] <- newId 
+                cat(i, newId,"\n")
         }
-}
-
-refineIds <- function(preprocessedString) {
-        for ( r in 1:length(preprocessedString)) {
-                for (i in 0:5) {
-                        splitStr <- unlist(strsplit(preprocessedString,""))
-                        for (j in 1:length(LETTERS)) {
-                                splitStr[]
-                                
+        if ( allreadyInBag ) {
+                for (j in 1:nchar(puebla$secName[i])) {
+                        newId <- paste(firstInitial,
+                                       substr(puebla$secName[i],j,j),sep="")
+                        newId <- paste(puebla$region[i],newId,sep=".")
+                        allreadyInBag <- newId %in% bag
+                        if ( ! allreadyInBag ) {
+                                bag <- c(bag,newId)
+                                puebla$id[i] <- newId 
+                                cat(i, newId,"\n")
+                                break 
                         }
+                }
+        }
+        ## try to assign first initial and any letter
+        if ( allreadyInBag ) {
+                for (j in 1:length(LETTERS)) {
+                        newId <- paste(firstInitial,
+                                       LETTERS[j],sep="")
+                        newId <- paste(puebla$region[i],newId,sep=".")
+                        allreadyInBag <- newId %in% bag
+                        if ( ! allreadyInBag ) {
+                                bag <- c(bag,newId)
+                                puebla$id[i] <- newId 
+                                cat(i, newId,"\n")
+                                break 
+                        }
+                }
+        }
+        ## using any first letter and the second initial
+        if ( allreadyInBag ) {
+                for (j in 1:length(LETTERS)) {
+                        newId <- paste(LETTERS[j],
+                                       secondInitial,sep="")
+                        newId <- paste(puebla$region[i],newId,sep=".")
+                        allreadyInBag <- newId %in% bag
+                        if ( ! allreadyInBag ) {
+                                bag <- c(bag,newId)
+                                puebla$id[i] <- newId 
+                                cat(i, newId,"\n")
+                                break 
+                        }
+                }
+        }
+        ## using any letters
+        if ( allreadyInBag ) {
+                for (j in 1:length(LETTERS)) {
+                        for (k in 1:length(LETTERS)) {
+                                newId <- paste(LETTERS[j],
+                                               LETTERS[k],sep="")
+                                newId <- paste(puebla$region[i],newId,sep=".")
+                                allreadyInBag <- newId %in% bag
+                                if ( ! allreadyInBag ) {
+                                        bag <- c(bag,newId)
+                                        puebla$id[i] <- newId 
+                                        cat(i, newId,"\n")
+                                        break 
+                                }
+                        }
+                        if ( allreadyInBag ) break
                 }
         }
 }
 
-res <- combn(LETTERS,2,simplify = TRUE)
-res <- sapply(res, function(x) x)
+pueblaIds <- puebla[,c("Estado","Municipio","Colonia","id")]
+write.csv(pueblaIds,file = "PUEBLAIDSv2.csv")
+

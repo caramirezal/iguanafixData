@@ -34,6 +34,9 @@ puebla <- localidades[,c("d_estado",
 
 puebla <- puebla[!duplicated(puebla),]
 
+puebla <- puebla[!grepl("San Joaquín",puebla$D_mnpio),]
+puebla <- puebla[!grepl("Colón",puebla$D_mnpio),]
+
 puebla <- mutate(puebla,entidad_nombre=filterStrings(d_estado),
                  nombre_municipio=filterStrings(D_mnpio),
                  nombre_colonia=filterStrings(d_asenta))
@@ -53,13 +56,18 @@ puebla$secName <- gsub("^SANTA","",puebla$secName)
 puebla$secName <- gsub("^SAN","",puebla$secName)
 
 
-puebla <- mutate(puebla, region=paste(substring(entidad_nombre,1,2),
-                                    substring(nombre_municipio,1,2),
-                                    sep = "."))
+puebla <- mutate(puebla, region=paste(paste(substr(entidad_nombre,1,1),
+                                            substr(entidad_nombre,2,2),
+                                            sep=""),
+                                      paste(substr(nombre_municipio,1,1),
+                                            substr(nombre_municipio,2,2),
+                                            sep=""),
+                                      sep = "."))
 
 puebla <- mutate(puebla, Estado=entidad_nombre,Municipio=nombre_municipio,
                  Colonia=nombre_colonia)
 
+alpnum <- c(as.character(0:9),LETTERS)
 
 
 bag <- NULL
@@ -76,7 +84,6 @@ for (i in 1:length(puebla$entidad_nombre)) {
                 bag <- c(bag,newId)
                 puebla$id[i] <- newId 
                 cat(i, newId,"\n")
-                allreadyInBag <- newId %in% bag
         }
         if ( allreadyInBag ) {
                 for (j in 1:nchar(puebla$secName[i])) {
@@ -88,10 +95,8 @@ for (i in 1:length(puebla$entidad_nombre)) {
                                 bag <- c(bag,newId)
                                 puebla$id[i] <- newId 
                                 cat(i, newId,"\n")
-                                allreadyInBag <- newId %in% bag
                                 break 
                         }
-                        if ( allreadyInBag ) { break }
                 }
         }
         ## try to assign first initial and any letter
@@ -105,10 +110,8 @@ for (i in 1:length(puebla$entidad_nombre)) {
                                 bag <- c(bag,newId)
                                 puebla$id[i] <- newId 
                                 cat(i, newId,"\n")
-                                allreadyInBag <- newId %in% bag
                                 break 
                         }
-                        if ( allreadyInBag ) { break }
                 }
         }
         ## using any first letter and the second initial
@@ -121,107 +124,46 @@ for (i in 1:length(puebla$entidad_nombre)) {
                         if ( ! allreadyInBag ) {
                                 bag <- c(bag,newId)
                                 puebla$id[i] <- newId 
-                                cat(i, newId,"\n")
-                                allreadyInBag <- newId %in% bag
+                                #cat(i, newId,"\n")
                                 break 
                         }
-                        if ( allreadyInBag ) { break }
                 }
         }
         ## using any letters
         if ( allreadyInBag ) {
-                for (j in 1:length(LETTERS)) {
-                        for (k in 1:length(LETTERS)) {
-                                newId <- paste(LETTERS[j],
-                                               LETTERS[k],sep="")
+                for (j in 1:length(alpnum)) {
+                        for (k in 1:length(alpnum)) {
+                                newId <- paste(alpnum[j],
+                                               alpnum[k],sep="")
                                 newId <- paste(puebla$region[i],newId,sep=".")
                                 allreadyInBag <- newId %in% bag
                                 if ( ! allreadyInBag ) {
                                         bag <- c(bag,newId)
                                         puebla$id[i] <- newId 
-                                        cat(i, newId,"\n")
-                                        allreadyInBag <- newId %in% bag
+                                        #cat(i, newId,"\n")
                                         break 
                                 }
                         }
-                        if ( allreadyInBag ) { break }
-                }
-        }
-        ## using any letters
-        if ( allreadyInBag ) {
-                for (j in 1:length(LETTERS)) {
-                        for (k in 1:length(LETTERS)) {
-                                newId <- paste(LETTERS[j],
-                                               LETTERS[k],sep="")
-                                newId <- paste('QU.QE',newId,sep=".")
-                                #cat("any letters and QE newId:",newId,"\n")
-                                allreadyInBag <- newId %in% bag
-                                cat(i,": allready in Bag outside:",allreadyInBag,"\n")
-                                if ( ! allreadyInBag ) {
-                                        cat("allready in Bag inside:",allreadyInBag,"\n")
-                                        bag <- c(bag,newId)
-                                        puebla$id[i] <- newId 
-                                        cat(i, newId,puebla$id[i],"\n")
-                                        allreadyInBag <- newId %in% bag
-                                        break 
-                                }
-                                if ( allreadyInBag ) break
-                        }
-                        if ( allreadyInBag ) break
-                }
-        }
-        ## using any letters
-        if ( allreadyInBag ) {
-                for (j in 1:length(LETTERS)) {
-                        for (k in 1:length(LETTERS)) {
-                                newId <- paste(LETTERS[j],
-                                               LETTERS[k],sep="")
-                                newId <- paste('QU.QO',newId,sep=".")
-                                allreadyInBag <- newId %in% bag
-                                if ( ! allreadyInBag ) {
-                                        bag <- c(bag,newId)
-                                        puebla$id[i] <- newId 
-                                        cat(i, newId,"\n")
-                                        allreadyInBag <- newId %in% bag
-                                        break 
-                                }
-                        }
-                        
                         if ( allreadyInBag ) break
                 }
         }
         
 }
 
+###############################################################################################################
 
-#combinations <- combn(LETTERS,4)
-#combinations <- sapply(1:ncol(combinations),function(x) paste(combinations[,x],collapse = ""))
-#combinations <- sapply(1:length(combinations), function(x) paste("PU",
-#                                                                 substr(combinations[x],1,2),
-#                                                                 substr(combinations[x],3,4),
-#                                                                 sep=".") )
-#
-#for (i in 1:nrow(puebla)){
-#        if ( ( puebla$id[i] == '--.--.--' ) | ( nchar(puebla$id[i]) != nchar("PU.AB.CD") ) ) {
-#                for ( j in 1:length(combinations)) {
-#                        newId <- combinations[j]
-#                        allreadyInBag <- newId %in% bag
-#                        if ( ! allreadyInBag ) {
-#                                bag <- c(bag,newId)
-#                                puebla$id[i] <- newId 
-#                                cat(i, newId,"\n")
-#                                break 
-#                        }
-#                }
-#        }
-#}
+
+##########################################################################################
 
 
 
-pueblaIds <- puebla[,c("entidad_nombre","nombre_municipio","nombre_colonia","id")]
+pueblaIds <- puebla[,c("d_estado","D_mnpio","d_asenta","id")]
+pueblaIds <- rename(pueblaIds,Estado=d_estado,Municipio=D_mnpio,Colonia=d_asenta)
+pueblaIds <- filter(pueblaIds,id!='--.--.--')
 write.csv(pueblaIds,file = "IDsQueretaro.csv",row.names = FALSE)
 
 zoneIds <- puebla[,c("d_estado","D_mnpio","id")]
+zone
 zoneIds$id <- substr(zoneIds$id,1,5)
 zoneIds <- zoneIds[!duplicated(zoneIds),]
 zoneIds <- mutate(zoneIds,MunicipioFormatted=filterStrings(D_mnpio))
@@ -253,7 +195,6 @@ for (i in 1:nrow(zoneIds)) {
 }
 
 zoneIds <- select(zoneIds,d_estado:id)
+zoneIds <- filter(zoneIds,id!='--.--')
 write.csv(zoneIds,file = "IDsZonesQueretaro.csv",row.names = FALSE)
-
-
 
