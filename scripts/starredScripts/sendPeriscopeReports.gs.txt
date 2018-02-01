@@ -8,17 +8,17 @@ function sendPeriscopeReport() {
   var first = ss.getSheetByName("Sheet1");
   first.clear();
   //
-  // update clear spreadsheet
+  // update spreadsheet
   SpreadsheetApp.flush();
   //
   // import csv
-  var csvUrl = "https://app.periscopedata.com/api/iguanafix/chart/csv/ff990ac3-53df-2451-9cc6-36866f7182e6";
+  var csvUrl = "https://app.periscopedata.com/api/iguanafix/chart/csv/73644bf4-4cde-ef21-a469-9211c559c410";
   var csvContent = UrlFetchApp.fetch(csvUrl).getContentText();
   var csvData = Utilities.parseCsv(csvContent);  
   var sheet = SpreadsheetApp.getActiveSheet();
   sheet.getRange(1, 1, csvData.length, csvData[0].length).setValues(csvData);
   
-  // update new data
+  // update spreadsheet
   SpreadsheetApp.flush();
   
   // Send email with the current active spreadsheet attached 
@@ -30,14 +30,14 @@ function sendPeriscopeReport() {
       headers     : {"Authorization": "Bearer " + ScriptApp.getOAuthToken()},
       muteHttpExceptions: true
     };
-    //  
+    
     var blob = UrlFetchApp.fetch(url, params).getBlob();
-    //
+    
     blob.setName(ss.getName() + ".xlsx");
-    //
+    
     // Edit email recipients, subject and body message 
-    MailApp.sendEmail("carlos.ramirez@iguanafix.com",   // Recipients 
-                      "Reporte Semanal IguanaFix fixed script Test",                                 // Subject
+    MailApp.sendEmail("carlos.ramirez@iguanafix.com,jose.ceron@iguanafix.com",   // Recipients 
+                      "Reporte Semanal IguanaFix test",                                 // Subject
                       "Estimado usuario: \n \n     Su reporte está listo!! Gracias por su confianza en IguanaFix.",      // Body message
                       {attachments: [blob]});
     
@@ -45,4 +45,5 @@ function sendPeriscopeReport() {
     Logger.log(f.toString());
   }
 }
+
 
